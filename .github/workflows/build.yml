@@ -18,7 +18,7 @@ jobs:
     - name: Install modern devkitARM
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libpng-dev tools-debiandoc
+        sudo apt-get install -y build-essential libpng-dev
         wget https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.deb
         sudo apt-get install ./devkitpro-pacman.deb
         sudo dkp-pacman -Syy --noconfirm
