@@ -24,8 +24,7 @@ jobs:
 
     - name: Compile ROM
       run: |
-        make -j$(nproc) nonmatching
-
+        make -j$(nproc) modern
     - name: Upload GBA Artifact
       uses: actions/upload-artifact@v4
       with:
