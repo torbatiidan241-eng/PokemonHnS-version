@@ -19,8 +19,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential libpng-dev
-        wget https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.deb
-        sudo apt-get install ./devkitpro-pacman.deb
+        # Download and run the official devkitPro install script
+        wget https://apt.devkitpro.org/install-devkitpro-pacman
+        chmod +x install-devkitpro-pacman
+        sudo ./install-devkitpro-pacman --noconfirm
+        # Use the newly installed pacman to get GBA development tools
         sudo dkp-pacman -Syy --noconfirm
         sudo dkp-pacman -S gba-dev --noconfirm
 
