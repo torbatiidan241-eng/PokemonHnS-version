@@ -10,28 +10,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Run the entire job inside the official devkitPro GBA development environment
+    container: devkitpro/devkitarm:latest
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Install modern devkitARM
+    - name: Install build dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential libpng-dev
-        # Download using a custom user-agent to bypass the 403 Forbidden block
-        wget --user-agent="Mozilla/5.0" https://apt.devkitpro.org/install-devkitpro-pacman
-        chmod +x install-devkitpro-pacman
-        sudo ./install-devkitpro-pacman --noconfirm
-        # Use pacman to get GBA development tools
-        sudo dkp-pacman -Syy --noconfirm
-        sudo dkp-pacman -S gba-dev --noconfirm
-
-    - name: Set Environment Variables
-      run: |
-        echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
-        echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
-        echo "/opt/devkitpro/devkitARM/bin" >> $GITHUB_PATH
+        apt-get update
+        apt-get install -y build-essential libpng-dev
 
     - name: Compile ROM
       run: |
