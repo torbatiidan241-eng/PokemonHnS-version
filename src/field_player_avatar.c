@@ -327,7 +327,7 @@ void MovementType_Player(struct Sprite *sprite)
     UpdateObjectEventCurrentMovement(&gObjectEvents[sprite->data[0]], sprite, ObjectEventCB2_NoMovement2);
 }
 
-static u8 ObjectEventCB2_NoMovement2(void)
+static bool8 ObjectEventCB2_NoMovement2(struct ObjectEvent *objectEvent, struct Sprite *sprite)
 {
     return 0;
 }
