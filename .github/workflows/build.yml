@@ -19,11 +19,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential libpng-dev
-        # Download and run the official devkitPro install script
-        wget https://apt.devkitpro.org/install-devkitpro-pacman
+        # Download using a custom user-agent to bypass the 403 Forbidden block
+        wget --user-agent="Mozilla/5.0" https://apt.devkitpro.org/install-devkitpro-pacman
         chmod +x install-devkitpro-pacman
         sudo ./install-devkitpro-pacman --noconfirm
-        # Use the newly installed pacman to get GBA development tools
+        # Use pacman to get GBA development tools
         sudo dkp-pacman -Syy --noconfirm
         sudo dkp-pacman -S gba-dev --noconfirm
 
