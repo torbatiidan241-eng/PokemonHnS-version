@@ -1,0 +1,32 @@
+name: Build PokemonHnS-version
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Run the entire job inside the official devkitPro GBA development environment
+    container: devkitpro/devkitarm:latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install build dependencies
+      run: |
+        apt-get update
+        apt-get install -y build-essential libpng-dev
+
+    - name: Compile ROM
+      run: |
+        make -j$(nproc) modern
+    - name: Upload GBA Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PokemonHnS-version-Build
+        path: "*.gba"
