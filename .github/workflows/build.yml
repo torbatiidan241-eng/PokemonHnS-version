@@ -1,0 +1,41 @@
+name: Build PokemonHnS-version
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install modern devkitARM
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libpng-dev tools-debiandoc
+        wget https://github.com/devkitPro/pacman/releases/download/v1.0.2/devkitpro-pacman.deb
+        sudo apt-get install ./devkitpro-pacman.deb
+        sudo dkp-pacman -Syy --noconfirm
+        sudo dkp-pacman -S gba-dev --noconfirm
+
+    - name: Set Environment Variables
+      run: |
+        echo "DEVKITPRO=/opt/devkitpro" >> $GITHUB_ENV
+        echo "DEVKITARM=/opt/devkitpro/devkitARM" >> $GITHUB_ENV
+        echo "/opt/devkitpro/devkitARM/bin" >> $GITHUB_PATH
+
+    - name: Compile ROM
+      run: |
+        make -j$(nproc) nonmatching
+
+    - name: Upload GBA Artifact
+      uses: actions/artifacts@v4
+      with:
+        name: PokemonHnS-version-Build
+        path: "*.gba"
