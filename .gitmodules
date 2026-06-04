@@ -1,3 +1,0 @@
-[submodule "tools/agbcc"]
-	path = tools/agbcc
-	url = https://github.com/pret/agbcc
