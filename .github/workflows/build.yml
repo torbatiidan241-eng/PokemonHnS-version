@@ -16,17 +16,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev autoconf
 
-      - name: Build Compiler (agbcc)
+      - name: Build Compiler
         run: |
-          # The agbcc folder is a submodule; we must build it to create the 'bin/agbcc' file
+          # 1. Compile agbcc
           cd tools/agbcc
           ./build.sh
-          ./install.sh
+          # 2. Force install into the expected location
+          mkdir -p bin
+          cp agbcc bin/agbcc
           cd ../..
 
       - name: Build ROM
         run: |
-          # Now that agbcc is built, the standard make process will work
+          # 3. Explicitly tell make where the compiler is
+          export AGBCC=$(pwd)/tools/agbcc/bin/agbcc
           make -j$(nproc)
 
       - name: Upload ROM artifact
