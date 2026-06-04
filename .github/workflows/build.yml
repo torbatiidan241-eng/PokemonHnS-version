@@ -18,14 +18,25 @@ jobs:
 
       - name: Build Tools
         run: |
-          # Manually build the tools first to ensure they exist
+          # 1. Build standard tools
           make tools
-          # Verify that agbcc actually exists before moving on
-          ls -l tools/agbcc/bin/agbcc || (echo "AGBCC not found!" && exit 1)
+          
+          # 2. Specifically build agbcc
+          # Some projects require building agbcc this way
+          cd tools/agbcc
+          ./build.sh
+          ./install.sh
+          cd ../..
+          
+          # 3. Final verification
+          if [ ! -f "tools/agbcc/bin/agbcc" ]; then
+            echo "AGBCC failed to build!"
+            ls -R tools/agbcc
+            exit 1
+          fi
 
       - name: Build ROM
         run: |
-          # Build the game now that tools are confirmed
           make -j$(nproc)
 
       - name: Upload ROM artifact
