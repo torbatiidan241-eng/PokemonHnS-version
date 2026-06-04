@@ -18,20 +18,18 @@ jobs:
 
       - name: Build Compiler
         run: |
-          # 1. Compile agbcc
-          cd tools/agbcc
-          ./build.sh
-          # 2. Force install into the expected location
-          mkdir -p bin
-          cp agbcc bin/agbcc
-          cd ../..
+          # 1. Instead of building from source, ensure we have the necessary 32-bit libraries
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y libc6:i386 libncurses5:i386 libstdc++6:i386
+          
+          # 2. Build the tools that CAN be built
+          make tools
 
       - name: Build ROM
         run: |
-          # 3. Explicitly tell make where the compiler is
-          export AGBCC=$(pwd)/tools/agbcc/bin/agbcc
+          # Use the provided AGUCC_PATH to bypass pathing issues
           make -j$(nproc)
-
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
