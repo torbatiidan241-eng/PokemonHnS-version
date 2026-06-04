@@ -14,25 +14,26 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev
+          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev autoconf
 
-      - name: Build Tools
+      - name: Build and Verify Compiler
         run: |
-          # 1. Build the local tools (gbagfx, mid2agb, etc)
-          make tools
-          
-          # 2. Check if agbcc exists
-          if [ ! -f "tools/agbcc/bin/agbcc" ]; then
-            echo "AGBCC binary missing! Attempting to build from source..."
-            cd tools/agbcc
-            ./build.sh
-            ./install.sh
-            cd ../..
+          cd tools/agbcc
+          ./build.sh
+          ./install.sh
+          # CRITICAL: Verify the file exists
+          if [ -f "bin/agbcc" ]; then
+            echo "Compiler found at $(pwd)/bin/agbcc"
+          else
+            echo "Compiler failed to install!"
+            exit 1
           fi
+          cd ../..
 
       - name: Build ROM
         run: |
-          # The -j$(nproc) flag parallelizes the build
+          # Use the path to the verified binary
+          export AGBCC=$(pwd)/tools/agbcc/bin/agbcc
           make -j$(nproc)
 
       - name: Upload ROM artifact
