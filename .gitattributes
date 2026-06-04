@@ -1,1 +1,4 @@
-*.pal text eol=crlf
+*.png binary
+*.4bpp binary
+*.pal binary
+*.gbapal binary
