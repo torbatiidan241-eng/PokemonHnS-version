@@ -14,12 +14,14 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi
+          # libpng-dev is required for building GBA image tools
+          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev
 
-      - name: Clean and Build
+      - name: Build ROM
         run: |
-          # Cleaning ensures no stale or mismatched .o files cause the archiver to fail
+          # Clean old artifacts to prevent caching errors
           make clean
+          # Compile the project using all available CPU cores
           make -j$(nproc)
 
       - name: Upload ROM artifact
