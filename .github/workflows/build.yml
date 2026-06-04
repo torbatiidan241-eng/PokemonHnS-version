@@ -1,6 +1,10 @@
 name: Build ROM
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -8,20 +12,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-        with:
-          submodules: recursive
 
-      - name: Install build dependencies
+      - name: Install system dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev
 
-      - name: Get agbcc
+      - name: Fetch and install agbcc
         run: |
-          # Download the compiler directly from the official source
-          curl -L https://github.com/pret/agbcc/releases/download/latest/agbcc.tar.gz | tar -xz -C tools/
-          # Fix permissions for the binary
+          mkdir -p tools/agbcc
+          curl -L https://github.com/pret/agbcc/releases/download/latest/agbcc.tar.gz | tar -xz -C tools/agbcc --strip-components=1
           chmod +x tools/agbcc/bin/agbcc
+
+      - name: Build tools
+        run: make tools
+
       - name: Build ROM
         run: make
 
