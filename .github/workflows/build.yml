@@ -21,9 +21,9 @@ jobs:
       - name: Fetch and install agbcc
         run: |
           mkdir -p tools/agbcc
-          curl -L https://github.com/pret/agbcc/releases/download/latest/agbcc.tar.gz | tar -xz -C tools/agbcc --strip-components=1
+          # Use a direct link to a known-good release
+          curl -L https://github.com/pret/agbcc/releases/download/v1.0.0/agbcc.tar.gz | tar -xz -C tools/agbcc --strip-components=1
           chmod +x tools/agbcc/bin/agbcc
-
       - name: Build tools
         run: make tools
 
