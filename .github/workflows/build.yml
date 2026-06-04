@@ -29,19 +29,30 @@ jobs:
         run: |
           make tools
           
-          # If the binary is missing, force the manual build with the correct path
           if [ ! -f "tools/agbcc/bin/agbcc" ]; then
-            echo "Binary missing, attempting manual build with path..."
+            echo "Binary missing, attempting manual build..."
             cd tools/agbcc
+            
+            # 1. Compile
             ./build.sh
-            # Tell the script to install into the local 'bin' folder
-            ./install.sh "$(pwd)/bin"
+            
+            # 2. Create the exact path the installer expects
+            mkdir -p ../../tools/agbcc
+            
+            # 3. Run install.sh pointing to the project root
+            # Note: We use the absolute path to the project root
+            ./install.sh "$(pwd)/../../"
+            
             cd ../..
           fi
           
           # Final validation
-          if [ ! -f "tools/agbcc/bin/agbcc" ]; then
-            echo "CRITICAL: agbcc still not found after manual install."
+          if [ -f "tools/agbcc/bin/agbcc" ]; then
+            echo "Compiler successfully found at tools/agbcc/bin/agbcc"
+          else
+            # DEBUG: Print the directory structure to see where files went
+            echo "Listing tools/agbcc directory:"
+            ls -R tools/agbcc
             exit 1
           fi
       - name: Build ROM
