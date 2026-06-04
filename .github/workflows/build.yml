@@ -16,13 +16,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi
 
-      - name: Build ROM
+      - name: Clean and Build
         run: |
-          # Use your specific make target (e.g., make or make -j$(nproc))
+          # Cleaning ensures no stale or mismatched .o files cause the archiver to fail
+          make clean
           make -j$(nproc)
 
-      - name: Upload artifact
+      - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rom-artifact
+          name: Pokemon-ROM-Build
           path: "*.gba"
