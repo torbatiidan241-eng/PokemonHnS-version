@@ -16,31 +16,29 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev autoconf
 
-      - name: Build and Verify Compiler
+      - name: Build Tools
         run: |
-          # 1. Skip the broken manual build
-          # 2. Download the pre-compiled agbcc for Linux
-          # Many projects use a specific URL for their toolchain
-          # Or, if your repository has the 'tools' folder, verify the binary exists.
+          # 1. Install necessary dependencies for tool compilation
+          sudo apt-get update
+          sudo apt-get install -y build-essential libpng-dev libgmp-dev gcc-arm-none-eabi
           
-          echo "Attempting to find/download pre-compiled agbcc..."
-          # This assumes you are following the standard 'pret' setup.
-          # If you don't have the binary, you can download a known-good one:
-          wget https://github.com/pret/agbcc/releases/download/latest/agbcc.tar.gz
-          tar -xvf agbcc.tar.gz -C tools/agbcc/
+          # 2. Build the tools. 
+          # Note: If your project is a standard pret fork, 'make tools' 
+          # will handle downloading the correct agbcc binary for you.
+          make tools
           
-          # 3. Verify it exists
+          # 3. Check if it worked
           if [ -f "tools/agbcc/bin/agbcc" ]; then
-            chmod +x tools/agbcc/bin/agbcc
-            echo "Compiler found and executable at $(pwd)/tools/agbcc/bin/agbcc"
+            echo "Compiler successfully set up."
           else
-            echo "Failed to download/extract compiler!"
+            echo "ERROR: tools/agbcc/bin/agbcc not found after 'make tools'."
+            # Final fallback: If this fails, the submodule may not be linked correctly.
             exit 1
           fi
+
       - name: Build ROM
         run: |
-          # Use the path to the verified binary
-          export AGBCC=$(pwd)/tools/agbcc/bin/agbcc
+          # Use the project-standard build command
           make -j$(nproc)
 
       - name: Upload ROM artifact
