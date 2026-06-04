@@ -14,15 +14,18 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev
+          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev autoconf
+
+      - name: Build Tools
+        run: |
+          # Manually build the tools first to ensure they exist
+          make tools
+          # Verify that agbcc actually exists before moving on
+          ls -l tools/agbcc/bin/agbcc || (echo "AGBCC not found!" && exit 1)
 
       - name: Build ROM
         run: |
-          # 1. Clean the build directory
-          make clean
-          # 2. Rebuild the essential GBA toolchain
-          make tools
-          # 3. Finally, compile the game using the now-present tools
+          # Build the game now that tools are confirmed
           make -j$(nproc)
 
       - name: Upload ROM artifact
