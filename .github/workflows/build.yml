@@ -10,39 +10,46 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev autoconf
+          sudo apt-get install -y build-essential libpng-dev libgmp-dev gcc-arm-none-eabi
+
+      - name: Initialize and Verify Submodules
+        run: |
+          git submodule update --init --recursive
+          if [ ! -d "tools/agbcc" ] || [ -z "$(ls -A tools/agbcc)" ]; then
+            echo "Error: tools/agbcc submodule is empty!"
+            exit 1
+          fi
 
       - name: Build Tools
         run: |
-          # 1. Install necessary dependencies for tool compilation
-          sudo apt-get update
-          sudo apt-get install -y build-essential libpng-dev libgmp-dev gcc-arm-none-eabi
-          
-          # 2. Build the tools. 
-          # Note: If your project is a standard pret fork, 'make tools' 
-          # will handle downloading the correct agbcc binary for you.
           make tools
+          # If 'make tools' failed to create agbcc, try manual compilation
+          if [ ! -f "tools/agbcc/bin/agbcc" ]; then
+            echo "Binary missing, attempting manual build..."
+            cd tools/agbcc
+            ./build.sh
+            ./install.sh
+            cd ../..
+          fi
           
-          # 3. Check if it worked
-          if [ -f "tools/agbcc/bin/agbcc" ]; then
-            echo "Compiler successfully set up."
-          else
-            echo "ERROR: tools/agbcc/bin/agbcc not found after 'make tools'."
-            # Final fallback: If this fails, the submodule may not be linked correctly.
+          # Final validation
+          if [ ! -f "tools/agbcc/bin/agbcc" ]; then
+            echo "CRITICAL: agbcc still not found."
             exit 1
           fi
 
       - name: Build ROM
         run: |
-          # Use the project-standard build command
+          # The standard build command
           make -j$(nproc)
 
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
-          name: PokemonHnS-ROM
+          name: Pokemon-ROM
           path: "*.gba"
