@@ -1,32 +1,39 @@
-name: Build PokemonHnS-version
+name: Build GBA ROM
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  workflow_dispatch: 
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # Run the entire job inside the official devkitPro GBA development environment
-    container: devkitpro/devkitarm:latest
-
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Install build dependencies
-      run: |
-        apt-get update
-        apt-get install -y build-essential libpng-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev
 
-    - name: Compile ROM
-      run: |
-        make -j$(nproc) modern
-    - name: Upload GBA Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: PokemonHnS-version-Build
-        path: "*.gba"
+      - name: Build Tools
+        run: |
+          # 1. Build standard tools
+          make tools
+          
+          # 2. Ensure your manual agbcc is executable
+          # This assumes your structure is tools/agbcc/build.sh
+          chmod -R +x tools/agbcc
+          
+          # 3. Build agbcc manually if needed
+          cd tools/agbcc && ./build.sh && ./install.sh && cd ../..
+
+      - name: Build ROM
+        run: |
+          # Set the path so the Makefile finds the newly installed agbcc
+          export PATH=$PATH:$(pwd)/tools/agbcc/bin
+          make -j$(nproc)
+
+      - name: Upload ROM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PokemonHnS-ROM
+          path: "*.gba"
