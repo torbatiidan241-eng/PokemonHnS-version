@@ -14,14 +14,15 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          # Added libpng-dev and libgmp-dev (often required for older compilers)
           sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev
 
       - name: Build ROM
         run: |
+          # 1. Clean the build directory
           make clean
-          # MUST build tools before the game
+          # 2. Rebuild the essential GBA toolchain
           make tools
+          # 3. Finally, compile the game using the now-present tools
           make -j$(nproc)
 
       - name: Upload ROM artifact
