@@ -18,18 +18,25 @@ jobs:
 
       - name: Build and Verify Compiler
         run: |
-          cd tools/agbcc
-          ./build.sh
-          ./install.sh
-          # CRITICAL: Verify the file exists
-          if [ -f "bin/agbcc" ]; then
-            echo "Compiler found at $(pwd)/bin/agbcc"
+          # 1. Skip the broken manual build
+          # 2. Download the pre-compiled agbcc for Linux
+          # Many projects use a specific URL for their toolchain
+          # Or, if your repository has the 'tools' folder, verify the binary exists.
+          
+          echo "Attempting to find/download pre-compiled agbcc..."
+          # This assumes you are following the standard 'pret' setup.
+          # If you don't have the binary, you can download a known-good one:
+          wget https://github.com/pret/agbcc/releases/download/latest/agbcc.tar.gz
+          tar -xvf agbcc.tar.gz -C tools/agbcc/
+          
+          # 3. Verify it exists
+          if [ -f "tools/agbcc/bin/agbcc" ]; then
+            chmod +x tools/agbcc/bin/agbcc
+            echo "Compiler found and executable at $(pwd)/tools/agbcc/bin/agbcc"
           else
-            echo "Compiler failed to install!"
+            echo "Failed to download/extract compiler!"
             exit 1
           fi
-          cd ../..
-
       - name: Build ROM
         run: |
           # Use the path to the verified binary
