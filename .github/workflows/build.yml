@@ -8,28 +8,26 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: recursive  # This is the crucial line
 
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev
+          sudo apt-get install -y build-essential gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev libgmp-dev autoconf
 
       - name: Build Tools
         run: |
-          # 1. Build standard tools
+          # Build standard tools first
           make tools
           
-          # 2. Ensure your manual agbcc is executable
-          # This assumes your structure is tools/agbcc/build.sh
-          chmod -R +x tools/agbcc
+          # Since you are using a submodule, these tools should now 
+          # be available at tools/agbcc
+          # We don't need to manually 'cd' or run build.sh if make tools handles it
           
-          # 3. Build agbcc manually if needed
-          cd tools/agbcc && ./build.sh && ./install.sh && cd ../..
-
       - name: Build ROM
         run: |
-          # Set the path so the Makefile finds the newly installed agbcc
-          export PATH=$PATH:$(pwd)/tools/agbcc/bin
+          # Build the ROM
           make -j$(nproc)
 
       - name: Upload ROM artifact
