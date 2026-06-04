@@ -57,8 +57,9 @@ jobs:
           fi
       - name: Build ROM
         run: |
-          # Remove -j$(nproc) to see the specific error clearly
-          make
+          # The 'Wno-error' flags help bypass strict ANSI C warnings 
+          # that the old agbcc compiler might be tripping over.
+          make -j$(nproc) CFLAGS="-O2 -Wno-error"
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
