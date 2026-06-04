@@ -21,8 +21,13 @@ jobs:
       - name: Fetch and install agbcc
         run: |
           mkdir -p tools/agbcc
-          # This URL downloads the current master branch snapshot directly
+          # --strip-components=1 tells tar to ignore the top-level 'agbcc-master' folder
           curl -L https://github.com/pret/agbcc/archive/master.tar.gz | tar -xz -C tools/agbcc --strip-components=1
+          
+          # Now let's verify where the files actually landed
+          ls -R tools/agbcc
+          
+          # Ensure we are pointing to the correct binary location
           chmod +x tools/agbcc/bin/agbcc
       - name: Build tools
         run: make tools
