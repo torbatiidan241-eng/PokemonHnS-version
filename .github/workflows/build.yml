@@ -57,9 +57,8 @@ jobs:
           fi
       - name: Build ROM
         run: |
-          # The standard build command
-          make -j$(nproc)
-
+          # Remove -j$(nproc) to see the specific error clearly
+          make
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
