@@ -1,4 +1,4 @@
-name: Build GBA ROM
+name: Build ROM
 
 on: [push, pull_request]
 
@@ -6,63 +6,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          submodules: recursive # This is the critical line
+          submodules: recursive
 
-      - name: Build
-        run: |
-          make
-
-      - name: Install dependencies
+      - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libpng-dev libgmp-dev gcc-arm-none-eabi
+          sudo apt-get install -y gcc-arm-none-eabi binutils-arm-none-eabi libpng-dev
 
-      - name: Initialize and Verify Submodules
-        run: |
-          git submodule update --init --recursive
-          if [ ! -d "tools/agbcc" ] || [ -z "$(ls -A tools/agbcc)" ]; then
-            echo "Error: tools/agbcc submodule is empty!"
-            exit 1
-          fi
+      - name: Build local tools
+        run: make tools
 
-      - name: Build Tools
-        run: |
-          make tools
-          
-          if [ ! -f "tools/agbcc/bin/agbcc" ]; then
-            echo "Binary missing, attempting manual build..."
-            cd tools/agbcc
-            
-            # 1. Compile
-            ./build.sh
-            
-            # 2. Create the exact path the installer expects
-            mkdir -p ../../tools/agbcc
-            
-            # 3. Run install.sh pointing to the project root
-            # Note: We use the absolute path to the project root
-            ./install.sh "$(pwd)/../../"
-            
-            cd ../..
-          fi
-          
-          # Final validation
-          if [ -f "tools/agbcc/bin/agbcc" ]; then
-            echo "Compiler successfully found at tools/agbcc/bin/agbcc"
-          else
-            # DEBUG: Print the directory structure to see where files went
-            echo "Listing tools/agbcc directory:"
-            ls -R tools/agbcc
-            exit 1
-          fi
       - name: Build ROM
-        run: |
-          # The 'Wno-error' flags help bypass strict ANSI C warnings 
-          # that the old agbcc compiler might be tripping over.
-          make -j$(nproc) CFLAGS="-O2 -Wno-error"
+        run: make
       - name: Upload ROM artifact
         uses: actions/upload-artifact@v4
         with:
